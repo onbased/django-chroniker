@@ -277,7 +277,7 @@ class TimedProcess(Process):
     def __init__(self, max_seconds, time_type=c.MAX_TIME, fout=None, check_freq=1, *args, **kwargs):
         super(TimedProcess, self).__init__(*args, **kwargs)
         self.fout = fout or sys.stdout
-        self.t0 = time.clock()
+        self.t0 = time.process_time()
         self.t0_objective = time.time()
         self.max_seconds = float(max_seconds)
         self.t1 = None
