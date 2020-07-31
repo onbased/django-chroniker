@@ -26,7 +26,6 @@ except ImportError:
 from dateutil import rrule
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.core.management import call_command
 from django.db import models, connection, transaction
@@ -1237,8 +1236,6 @@ class Log(models.Model):
     duration_str.allow_tags = True
 
     def email_subscribers(self):
-        current_site = Site.objects.get_current()
-
         subscribers = []
         for user in self.job.subscribers.all():
             subscribers.append('"%s" <%s>' % (user.get_full_name(), user.email))
@@ -1249,10 +1246,18 @@ class Log(models.Model):
         else:
             subject_tmpl = _settings.CHRONIKER_EMAIL_SUBJECT_SUCCESS
 
+        base_url = None
+        if hasattr(settings, 'BASE_SECURE_URL'):
+            base_url = settings.BASE_SECURE_URL
+        elif hasattr(settings, 'BASE_URL'):
+            base_url = settings.BASE_URL
+        elif hasattr(settings, 'WEB_ROOT_URL'):
+            base_url = settings.BASE_URL
+
         args = self.__dict__.copy()
         args['job'] = self.job
         args['stderr'] = self.stderr if self.job.is_monitor else None
-        args['url'] = mark_safe('http://%s%s' % (current_site.domain, self.job.monitor_url_rendered))
+        args['url'] = mark_safe('http://%s%s' % (base_url, self.job.monitor_url_rendered)) if base_url else ''
         ctx = Context(args)
         subject = Template(subject_tmpl).render(ctx)
 
@@ -1270,17 +1275,6 @@ class Log(models.Model):
             except AttributeError:
                 pass
             body = "Ouput:\n%s\nError output:\n%s" % (stdout_str, stderr_str)
-
-        base_url = None
-        if hasattr(settings, 'BASE_SECURE_URL'):
-            base_url = settings.BASE_SECURE_URL
-        elif hasattr(settings, 'BASE_URL'):
-            base_url = settings.BASE_URL
-        elif current_site:
-            if current_site.domain.startswith('http'):
-                base_url = current_site.domain
-            else:
-                base_url = 'http://' + current_site.domain
 
         if base_url:
             admin_link = base_url + utils.get_admin_change_url(self.job)
