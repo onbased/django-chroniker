@@ -193,7 +193,7 @@ class JobAdmin(admin.ModelAdmin):
     inlines = (JobDependencyInline,)
 
     class Media:
-        js = ("chroniker/js/dygraph-combined.js",)
+        js = ("admin/chroniker/js/dygraph-combined.js",)
 
     def queryset(self, *args, **kwargs):
         qs = super(JobAdmin, self).queryset(*args, **kwargs)
@@ -630,7 +630,7 @@ class MonitorAdmin(admin.ModelAdmin):
     def action_buttons(self, obj):
         buttons = []
         buttons.append('<a href="%s" class="button">Check now</a>' % '%d/run/?inline=1' % obj.id)
-        buttons.append('<a href="/chroniker/job/%i/"' 'target="_blank" class="button">Edit</a>' % (obj.id,))
+        buttons.append('<a href="/admin/chroniker/job/%i/"' 'target="_blank" class="button">Edit</a>' % (obj.id,))
         return format_html(' '.join(buttons))
 
     action_buttons.allow_tags = True
