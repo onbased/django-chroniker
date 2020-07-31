@@ -193,7 +193,7 @@ class JobAdmin(admin.ModelAdmin):
     inlines = (JobDependencyInline,)
 
     class Media:
-        js = ("admin/chroniker/js/dygraph-combined.js",)
+        js = ("chroniker/js/dygraph-combined.js",)
 
     def queryset(self, *args, **kwargs):
         qs = super(JobAdmin, self).queryset(*args, **kwargs)
